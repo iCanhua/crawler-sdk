@@ -1,0 +1,39 @@
+group 'com.evolve'
+version '1.0-SNAPSHOT'
+
+
+ext.global = [
+  root_dir           : "${rootProject.projectDir}",
+  build_time         : new Date().format("yyyyMMddHHmm", TimeZone.getTimeZone("UTC")),
+]
+
+repositories {
+  mavenCentral()
+  jcenter()
+}
+
+
+allprojects {
+  apply plugin: 'java'
+  buildDir = new File(global.root_dir, "out/${project.name}")
+}
+
+subprojects {
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    compile(
+      "ch.qos.logback:logback-classic:1.1.+",
+      "ch.qos.logback:logback-core:1.1.+",
+      "commons-logging:commons-logging:1.+",
+      "org.slf4j:slf4j-api:1.7.+"
+    )
+    testCompile "junit:junit:4.+"
+    testCompile "org.mockito:mockito-all:1.10.19"
+    testCompile "org.powermock:powermock-module-junit4:1.6.4"
+    testCompile "org.powermock:powermock-api-mockito:1.6.4"
+  }
+}
+
