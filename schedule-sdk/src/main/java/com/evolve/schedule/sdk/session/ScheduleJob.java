@@ -56,11 +56,11 @@ public class ScheduleJob {
 
   }
 
-  public JSONObject getTask(int size) throws Exception {
+  public JSONArray getTask(int size) throws Exception {
     Map params = new HashMap();
     params.put("size",size);
     String response = HttpUtils.get(GET_TASK_URL,params,null);
-    return JSON.parseObject(response);
+    return (JSONArray)JSONArray.parse(response);
   }
 
   private JSONObject newStart(Map<String,Object> jobDataMap,String trigger){
