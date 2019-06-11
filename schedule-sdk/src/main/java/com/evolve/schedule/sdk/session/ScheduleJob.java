@@ -58,7 +58,7 @@ public class ScheduleJob {
 
   public JSONArray getTask(int size) throws Exception {
     Map params = new HashMap();
-    params.put("size",size);
+    params.put("size",String.valueOf(size));
     String response = HttpUtils.get(GET_TASK_URL,params,null);
     return (JSONArray)JSONArray.parse(response);
   }
