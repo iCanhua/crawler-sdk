@@ -16,7 +16,7 @@ public class ScheduleJob {
 
   private static final String SCHEDULE_API = "/v2/engine/schedule";
 
-  private static final String READY_UNIT_API = SCHEDULE_API + "/v2/engine/{group}/{job}/ready_unit";
+  private static final String READY_UNIT_API = "/v2/engine/{group}/{job}/ready_unit";
 
   private String SCHEDULE_URL;
 
@@ -29,6 +29,7 @@ public class ScheduleJob {
   public ScheduleJob(ScheduleClient client, String group, String job) {
     scheduleClient = client;
     SCHEDULE_URL = client.getServerUrl() + SCHEDULE_API;
+    GET_TASK_URL = client.getServerUrl() + READY_UNIT_API;
     GET_TASK_URL = READY_UNIT_API.replace("{group}",group);
     GET_TASK_URL = READY_UNIT_API.replace("{job}",job);
     this.group = group;
