@@ -30,8 +30,8 @@ public class ScheduleJob {
     scheduleClient = client;
     SCHEDULE_URL = client.getServerUrl() + SCHEDULE_API;
     GET_TASK_URL = client.getServerUrl() + READY_UNIT_API;
-    GET_TASK_URL = READY_UNIT_API.replace("{group}",group);
-    GET_TASK_URL = READY_UNIT_API.replace("{job}",job);
+    GET_TASK_URL = GET_TASK_URL.replace("{group}",group);
+    GET_TASK_URL = GET_TASK_URL.replace("{job}",job);
     this.group = group;
     this.job = job;
   }
