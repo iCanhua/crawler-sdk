@@ -1,5 +1,7 @@
 package com.evolve.schedule.sdk.session;
 
+import com.evolve.schedule.sdk.model.ScheduleJob;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +9,7 @@ public class ScheduleClient {
 
   String serverUrl;
 
-  Map<String,ScheduleJob> jobCache = new HashMap<>();
+  Map<String, ScheduleJob> jobCache = new HashMap<>();
 
   public String getServerUrl() {
     return serverUrl;

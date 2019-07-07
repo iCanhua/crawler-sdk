@@ -1,13 +1,13 @@
-package com.evolve.schedule.sdk.session;
+package com.evolve.schedule.sdk.model;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.evolve.schedule.sdk.session.ScheduleClient;
 import com.evolve.schedule.sdk.util.HttpUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ScheduleJob {
@@ -36,27 +36,18 @@ public class ScheduleJob {
     this.job = job;
   }
 
-  public void start(Map<String, Object> jobDataMap) throws Exception {
-    JSONArray start = new JSONArray();
-    start.add(newStart(jobDataMap, null));
+  void start(JobTask task) throws Exception {
+    JSONArray startArray = new JSONArray();
+    startArray.add(task.toJSON());
     JSONObject request = new JSONObject();
-    request.put("start", start);
+    request.put("start", startArray);
     postJson(SCHEDULE_URL, request);
   }
 
-  public void starts(List<Map<String, Object>> jobDataMaps) throws Exception {
-    JSONArray start = new JSONArray();
-    for (Map<String, Object> dataMap : jobDataMaps) {
-      start.add(newStart(dataMap, null));
-    }
-    JSONObject request = new JSONObject();
-    request.put("start", start);
-    postJson(SCHEDULE_URL, request);
+  public JobTask newTask(){
+    return new JobTask(this);
   }
 
-  public void schedule(Map<String, Object> jobDataMap, String cron) {
-
-  }
 
   public JSONArray getTask(int size) throws Exception {
     Map params = new HashMap();
@@ -65,20 +56,6 @@ public class ScheduleJob {
     return (JSONArray) JSONArray.parse(response);
   }
 
-  private JSONObject newStart(Map<String, Object> jobDataMap, String trigger) {
-    JSONObject start = new JSONObject();
-    start.put("jobDetail", newJobDetail(jobDataMap));
-    //    start.put("trigger","");
-    return start;
-  }
-
-  private JSONObject newJobDetail(Map<String, Object> jobDataMap) {
-    JSONObject jobDetail = new JSONObject();
-    jobDetail.put("group", group);
-    jobDetail.put("job", job);
-    jobDetail.put("jobDataMap", jobDataMap);
-    return jobDetail;
-  }
 
   private String postJson(String url, JSONObject body) throws Exception {
     Map<String, String> headers = new HashMap<>();
@@ -90,5 +67,11 @@ public class ScheduleJob {
     return response;
   }
 
+  public String getGroup() {
+    return group;
+  }
 
+  public String getJob() {
+    return job;
+  }
 }
