@@ -1,4 +1,4 @@
-package com.evolve.schedule.sdk;
+package com.evolve.schedule.sdk.constant;
 
 public class TaskField {
   public static final String TASK_FEATURE = "taskFeature";
