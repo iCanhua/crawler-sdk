@@ -9,3 +9,5 @@
 
 rootProject.name = 'evolve-sdk'
 include 'schedule-sdk'
+include 'common-util'
+
