@@ -15,13 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventBus {
 
-  private EventBus(){}
-
-  private static final EventBus instance = new EventBus();
-
-  public static EventBus getInstance(){
-    return instance;
+  EventBus(EventHub hub){
+    eventHub=hub;
   }
+
+
+  EventHub eventHub;
   /**
    * add  event to queue tail
    *
@@ -29,7 +28,7 @@ public class EventBus {
    * @param toHandler
    */
   public void send(EventHandler toHandler, Event event, Object payload) {
-    Message message = EventHub.getInstance().retrieve(event, payload,toHandler);
+    Message message = eventHub.retrieve(event, payload,toHandler);
     schedule(message);
   }
 
@@ -41,7 +40,7 @@ public class EventBus {
    * @param payload
    */
   public void send(String handlerId, Event event, Object payload) {
-    Message message = EventHub.getInstance().retrieve(event, payload,EventHub.getInstance().getHandler(handlerId));
+    Message message = eventHub.retrieve(event, payload,eventHub.getHandler(handlerId));
     schedule(message);
   }
 
@@ -52,11 +51,13 @@ public class EventBus {
    * @param payload
    */
   public void publish(Event event, Object payload) {
-    EventHub.getInstance();
+
   }
 
   private void schedule(Message message){
-    EventHub.getInstance();
+    eventHub.schedule(message);
   }
+
+
 
 }
