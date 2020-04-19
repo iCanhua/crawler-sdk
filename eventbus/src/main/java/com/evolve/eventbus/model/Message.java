@@ -1,6 +1,7 @@
 package com.evolve.eventbus.model;
 
 
+import com.evolve.eventbus.EventHub;
 import com.evolve.eventbus.handler.EventHandler;
 import com.evolve.eventbus.event.Event;
 
@@ -17,10 +18,16 @@ public class Message {
 
   private transient EventHandler handler;
 
+  private EventHub eventHub;
+
   public Message(Event event, Object payload, EventHandler handler) {
     this.event = event;
     this.payload = payload;
     this.handler =handler;
+  }
+
+  public void release(){
+    eventHub.release(this);
   }
 
 }

@@ -16,6 +16,7 @@ repositories {
 allprojects {
   apply plugin: 'java'
   buildDir = new File(global.root_dir, "out/${project.name}")
+
 }
 
 subprojects {

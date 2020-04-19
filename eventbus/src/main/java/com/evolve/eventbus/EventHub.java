@@ -2,9 +2,8 @@ package com.evolve.eventbus;
 
 import com.evolve.eventbus.event.Event;
 import com.evolve.eventbus.handler.EventHandler;
-import com.evolve.eventbus.loop.BaseEventLoopPool;
-import com.evolve.eventbus.loop.EventLoopPool;
-import com.evolve.eventbus.loop.SingleEventLoopPool;
+import com.evolve.eventbus.loop.BaseEventLoopGroup;
+import com.evolve.eventbus.loop.EventLoopGroup;
 import com.evolve.eventbus.model.Message;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,27 +17,31 @@ import lombok.Setter;
  */
 public class EventHub {
 
-  private EventHub(){
+  private EventHub() {
     eventBus = new EventBus(this);
   }
 
-  private ConcurrentHashMap<String,EventHandler> signHandlers = new ConcurrentHashMap();
+  private ConcurrentHashMap<String, EventHandler> signHandlers = new ConcurrentHashMap();
 
   private ConcurrentLinkedQueue<Message> messagesPool = new ConcurrentLinkedQueue<>(); // for reuse
   @Setter
   @Getter
-  private EventLoopPool pool;
+  private EventLoopGroup eventLoopGroup;
   @Getter
   private EventBus eventBus;
+  @Setter
+  @Getter
+  private int messageCacheSize=0;
 
-  public EventHandler getHandler(String handlerId){
+  public EventHandler getHandler(String handlerId) {
     return signHandlers.get(handlerId);
   }
 
   Message retrieve(Event event, Object payload, EventHandler handler) {
     Message message = messagesPool.poll();
-    if(message == null) {
+    if (message == null) {
       message = new Message(event, payload, handler);
+      message.setEventHub(this);
     } else {
       message.setEvent(event);
       message.setPayload(payload);
@@ -47,54 +50,60 @@ public class EventHub {
     return message;
   }
 
-  void schedule(Message message){
-    pool.dispatch(message);
+  void schedule(Message message) {
+    eventLoopGroup.dispatch(message);
   }
 
-
+  /**
+   * 释放消息，如果pool过大，则不放回池子；
+   * @param message
+   */
   public void release(Message message) {
     message.setHandler(null);
     message.setPayload(null);
     message.setEvent(null);
-    messagesPool.add(message);
+    if(messagesPool.size()<=messageCacheSize){
+      messagesPool.add(message);
+    }
   }
 
-  public static Builder builder(){
+  public static Builder builder() {
     return new Builder();
   }
 
   /**
    * 唯一建造方法
    */
-  private static class Builder{
+  public static class Builder {
 
-    private EventLoopPool pool;
+    private int loopCount = 1;
 
-    private int loopCount=1;
+    private int messageCacheSize =10;
 
-    public Builder loopCount(int count){
+    public Builder initLoopCount(int count) {
       loopCount = count;
       return this;
     }
 
-    public Builder eventPool(EventLoopPool pool){
-      this.pool = pool;
+    public Builder initMessageCacheSize(int size) {
+      messageCacheSize = size;
       return this;
     }
 
-    public EventHub build(){
+    public EventHub build() {
       EventHub eventHub = new EventHub();
-      if(pool!=null){
-        eventHub.setPool(pool);
-        return eventHub;
-      }else if(loopCount==1){
-        eventHub.setPool(new SingleEventLoopPool());
-        return eventHub;
-      }else {
-        eventHub.setPool(new BaseEventLoopPool(loopCount));
-        return eventHub;
-      }
+      eventHub.setEventLoopGroup(new BaseEventLoopGroup(loopCount));
+      eventHub.setMessageCacheSize(messageCacheSize);
+      return eventHub;
     }
+  }
+
+  public static void main(String[] args) {
+    EventHub eventHub = EventHub.builder().build();
+    Message retrieve = eventHub.retrieve(null, null, null);
+    retrieve.setPayload("dd");
+    System.out.println("dgfg");
+
   }
 
 }

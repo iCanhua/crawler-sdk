@@ -11,13 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 事件循环处理组
  */
-public class BaseEventLoopPool implements EventLoopPool {
+public class BaseEventLoopGroup implements EventLoopGroup {
 
   private ArrayList<EventLoop> eventLoops;
 
   private Map<String,EventLoop> attachMap=new ConcurrentHashMap();
 
-  public BaseEventLoopPool(int loopCount) {
+  public BaseEventLoopGroup(int loopCount) {
     eventLoops = new ArrayList<>();
     for (int i=0; i<loopCount; i++){
       eventLoops.add(new EventLoop());
@@ -25,7 +25,7 @@ public class BaseEventLoopPool implements EventLoopPool {
   }
 
   public void dispatch(Message message) {
-    EventLoop loop =getEventLoop(message.getEvent());
+    EventLoop loop = getEventLoop(message.getEvent());
     loop.push(message);
   }
 
@@ -36,17 +36,17 @@ public class BaseEventLoopPool implements EventLoopPool {
   private EventLoop getEventLoop(Event event){
     if(event instanceof AttachEvent){
       String attachId = ((AttachEvent) event).attachId();
-      return attachMap.computeIfAbsent(attachId,k->getEventLoop());
+      return attachMap.computeIfAbsent(attachId,k-> getLowLoadEventLoop());
     }else {
-      return getEventLoop();
+      return getLowLoadEventLoop();
     }
   }
 
   /**
-   * 后期实现为Netty的模式，固定的事务，如session,channel绑定固定的eventLoop
+   * 获取负载最低的loop
    * @return
    */
-  private EventLoop getEventLoop(){
+  private EventLoop getLowLoadEventLoop(){
     EventLoop  firstLoop =eventLoops.get(0);
     if(eventLoops.size()==1||firstLoop.getTaskSize()==0){
       return firstLoop;

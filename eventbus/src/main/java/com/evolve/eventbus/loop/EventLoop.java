@@ -46,7 +46,7 @@ public class EventLoop implements Runnable {
       } catch (Exception e) {
         log.error("event loop parse event cause an exception", e);
       }finally {
-        release(message);
+        message.release();
       }
     }
   }
@@ -63,10 +63,6 @@ public class EventLoop implements Runnable {
     }
     log.debug("add an event to tail of the queue, task desc is {} ,the queue size is {} now", task.toString(), taskRegistered
         .size());
-  }
-
-  private void release(Message message) {
-    EventHub.getInstance().release(message);
   }
 
   @SneakyThrows
