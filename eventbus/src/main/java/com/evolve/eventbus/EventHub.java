@@ -2,12 +2,17 @@ package com.evolve.eventbus;
 
 import com.evolve.eventbus.event.Event;
 import com.evolve.eventbus.handler.EventHandler;
+import com.evolve.eventbus.handler.SignEventHandler;
 import com.evolve.eventbus.loop.BaseEventLoopGroup;
 import com.evolve.eventbus.loop.EventLoopGroup;
+import com.evolve.eventbus.model.HandlerID;
 import com.evolve.eventbus.model.Message;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,9 +24,10 @@ public class EventHub {
 
   private EventHub() {
     eventBus = new EventBus(this);
+    softTimer.start();
   }
 
-  private ConcurrentHashMap<String, EventHandler> signHandlers = new ConcurrentHashMap();
+  private Map<HandlerID, EventHandler> signHandlers = new WeakHashMap<>();
 
   private ConcurrentLinkedQueue<Message> messagesPool = new ConcurrentLinkedQueue<>(); // for reuse
   @Setter
@@ -32,9 +38,24 @@ public class EventHub {
   @Setter
   @Getter
   private int messageCacheSize=0;
+  @Setter
+  @Getter
+  private SoftTimer softTimer=new SoftTimer(this);
+  @Setter
+  @Getter
+  private Lock registerLock = new ReentrantLock();
 
-  public EventHandler getHandler(String handlerId) {
+  public EventHandler getHandler(HandlerID handlerId) {
+    if(!signHandlers.containsKey(handlerId)){
+      return SignEventHandler.getMissingHandler();
+    }
     return signHandlers.get(handlerId);
+  }
+
+  public void register(SignEventHandler handler){
+    registerLock.lock();
+    signHandlers.put(handler.getId(),handler);
+    registerLock.unlock();
   }
 
   Message retrieve(Event event, Object payload, EventHandler handler) {

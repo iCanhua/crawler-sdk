@@ -1,7 +1,6 @@
 package com.evolve.eventbus.loop;
 
 
-import com.evolve.eventbus.EventHub;
 import com.evolve.eventbus.model.Message;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,7 +35,7 @@ public class EventLoop implements Runnable {
         log.debug("ready to parse an event, type is {}. the queue size is {} now",
                   message.getEvent(),
                   taskRegistered.size());
-        if(message != null) {
+        if(message != null && message.getHandler()!=null) {
           long curTime = System.currentTimeMillis();
           message.getHandler().handle(message.getEvent(), message.getPayload());
           if(System.currentTimeMillis() - curTime > 2000){

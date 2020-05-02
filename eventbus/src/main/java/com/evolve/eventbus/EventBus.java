@@ -3,6 +3,7 @@ package com.evolve.eventbus;
 
 import com.evolve.eventbus.event.Event;
 import com.evolve.eventbus.handler.EventHandler;
+import com.evolve.eventbus.model.HandlerID;
 import com.evolve.eventbus.model.Message;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class EventBus {
    * @param event
    * @param payload
    */
-  public void send(String handlerId, Event event, Object payload) {
+  public void send(HandlerID handlerId, Event event, Object payload) {
     Message message = eventHub.retrieve(event, payload,eventHub.getHandler(handlerId));
     schedule(message);
   }
